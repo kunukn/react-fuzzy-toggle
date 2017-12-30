@@ -43,25 +43,40 @@ export default class App extends React.Component {
         key={components.length}
         duration={this.state.duration}
         render={this.generateMarkupWithEase(eases['quartInOut'], 'quartInOut')}
-        onFull={log.bind(__,'onFull')}
-        onEmpty={log.bind(__,'onEmpty')}
-        onIncreasing={log.bind(__,'onIncreasing')}
-        onDecreasing={log.bind(__,'onDecreasing')}
+        onFull={log.bind(__, 'onFull')}
+        onEmpty={log.bind(__, 'onEmpty')}
+        onIncreasing={log.bind(__, 'onIncreasing')}
+        onDecreasing={log.bind(__, 'onDecreasing')}
       />
     );
     components.push(
       <FuzzyToggle
         key={components.length}
         duration={this.state.duration}
-        render={this.generateMarkupWithEase(eases['bounceInOut'], 'bounceInOut')}
+        render={this.generateMarkupWithEase(
+          eases['bounceInOut'],
+          'bounceInOut'
+        )}
       />
     );
 
     components.push(
       <FuzzyToggle
-        key={components.length}
-        duration={this.state.duration}
-        render={this.generateMarkupWithEase(eases['quadInOut'], 'quadInOut')}
+        key={'demo'}
+        duration={500}
+        render={({ onToggle, state }) => 
+          <div className="fuzzy-toggle">
+            <div className="fuzzy-toggle__header">
+              <button className="fuzzy-toggle__button" onClick={onToggle}>
+                toggle
+              </button>
+            </div>
+            <div className="fuzzy-toggle__box">
+              <div>{state.range.toFixed(1)}</div>
+              <div>{state.toggleState}</div>
+            </div>
+          </div>
+        }
       />
     );
 
