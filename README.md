@@ -10,7 +10,7 @@ You can reverse the toggle direction before it has finished the toggling.
 * npm start
 
 ```js
-import { FuzzyToggle } from 'ReactFuzzyToggle';
+import { FuzzyToggle } from 'react-fuzzy-toggle';
 
 <FuzzyToggle
   duration={500}
