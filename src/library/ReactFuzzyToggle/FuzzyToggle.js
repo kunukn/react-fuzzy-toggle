@@ -1,7 +1,5 @@
 /*
-  _state_ is used to minimize expensive re-renderings.
-  We don't want to update the state for every requestAnimationFrame
-  this.state is updated on toggle state change, used easing and duration.
+  _state_ is internal state, used for minimize unnessary re-renderings.
 */
 
 import React from 'react';
@@ -18,118 +16,87 @@ const cAF = window.cancelAnimationFrame
   : window.clearInterval.bind(window);
 
 const TOGGLE = {
-  EXPANDED: 'EXPANDED',
-  COLLAPSED: 'COLLAPSED',
-  EXPANDING: 'EXPANDING',
-  COLLAPSING: 'COLLAPSING',
+  EMPTY: 'EMPTY',
+  FULL: 'FULL',
+  DECREASING: 'DECREASING',
+  INCREASING: 'INCREASING',
 };
-const FUNCTION = 'function';
-
-const cubicInOut = t =>
-  t < 0.5 ? 4.0 * t * t * t : 0.5 * Math.pow(2.0 * t - 2.0, 3.0) + 1.0;
 
 export default class FuzzyToggle extends React.Component {
   static defaultProps = {
     duration: 300,
-    easeIn: cubicInOut,
-    easeOut: cubicInOut,
-    collapsed: false,
+    isFull: true,
   };
 
   // static propTypes = {
   //   duration: PropTypes.number,
-  //   easeIn: PropTypes.oneOfType([PropTypes.func]),
-  //   easeOut: PropTypes.oneOfType([PropTypes.func]),
-  //   collapsed: PropTypes.bool,
+  //   isFull: PropTypes.bool,
   // };
 
   constructor(props) {
     super(props);
 
     this._state_ = {
-      collasibleElement: null,
-      isAnimating: false,
-      toggleState: this.props.collapsed ? TOGGLE.COLLAPSED : TOGGLE.EXPANDED,
+      toggleState: this.props.isFull ? TOGGLE.FULL : TOGGLE.EMPTY,
+      range: this.props.isFull ? 1 : 0,
     };
 
-    const duration = this.setDuration(this.props.duration);
-    const { easeInName } = this.setEaseFunction({ easeIn: this.props.easeIn });
-    const { easeOutName } = this.setEaseFunction({
-      easeOut: this.props.easeOut,
-    });
+    this.setDuration(this.props.duration);
 
     this.state = {
       toggleState: this._state_.toggleState,
-      duration,
-      easeInName,
-      easeOutName,
+      duration: this._state_.duration,
+      range: this._state_.range,
     };
   }
 
-  setCollapsibleElement = element => {
-    if (!element) {
-      warn('no element in setCollapsibleElement');
-      return;
-    }
-    this._state_.collasibleElement = element;
-    if (this._state_.toggleState === TOGGLE.COLLAPSED) {
-      this.setCollapsedState();
-    } else if (this._state_.toggleState === TOGGLE.EXPANDED) {
-      this.setExpandedState();
-    }
-  };
+  now() {
+    return new Date().getTime();
+  }
 
   onToggle = () => {
-    const update_State_ = ({ toggleState, display, isReverse }) => {
-      this._state_.isAnimating = true;
+    const update_State_ = ({ toggleState, isReverse }) => {
+      const now = this.now();
+      
       this._state_.toggleState = toggleState;
-      if (typeof display !== undefined) {
-        this._state_.collasibleElement.style.display = display;
-      }
-      const now = new Date().getTime();
+      
       if (isReverse) {
-        const { duration, startAnimationTime } = this._state_;
-        const elapsedTime = Math.min(duration, now - startAnimationTime);
+        const { duration, startTime } = this._state_;
+        const elapsedTime = Math.min(duration, now - startTime);
         const subtract = Math.max(0, duration - elapsedTime);
-        this._state_.startAnimationTime = now - subtract;
+        this._state_.startTime = now - subtract;
       } else {
-        this._state_.boxHeight = this._state_.collasibleElement.clientHeight;
-        this._state_.startAnimationTime = now;
+        this._state_.startTime = now;
       }
     };
 
-    if (this._state_.toggleState === TOGGLE.EXPANDED) {
-      update_State_({ toggleState: TOGGLE.COLLAPSING });
+    if (this._state_.toggleState === TOGGLE.FULL) {
+      update_State_({ toggleState: TOGGLE.DECREASING });
       this.setState({
-        toggleState: TOGGLE.COLLAPSING,
-        isAnimating: this._state_.isAnimating,
+        toggleState: TOGGLE.DECREASING,
       });
-      this.collapse();
-    } else if (this._state_.toggleState === TOGGLE.COLLAPSED) {
-      update_State_({ toggleState: TOGGLE.EXPANDING, display: '' });
+      this.decreaseEvent();
+    } else if (this._state_.toggleState === TOGGLE.EMPTY) {
+      update_State_({ toggleState: TOGGLE.INCREASING });
       this.setState({
-        toggleState: TOGGLE.EXPANDING,
-        isAnimating: this._state_.isAnimating,
+        toggleState: TOGGLE.INCREASING,
       });
-      this.expand();
-    } else if (this._state_.toggleState === TOGGLE.EXPANDING) {
-      update_State_({ toggleState: TOGGLE.COLLAPSING, isReverse: true });
+      this.increaseEvent();
+    } else if (this._state_.toggleState === TOGGLE.INCREASING) {
+      update_State_({ toggleState: TOGGLE.DECREASING, isReverse: true });
       this.setState({
-        toggleState: TOGGLE.COLLAPSING,
-        isAnimating: this._state_.isAnimating,
+        toggleState: TOGGLE.DECREASING,
       });
-      this.collapse();
-    } else if (this._state_.toggleState === TOGGLE.COLLAPSING) {
+      this.decreaseEvent();
+    } else if (this._state_.toggleState === TOGGLE.DECREASING) {
       update_State_({
-        toggleState: TOGGLE.EXPANDING,
-        display: '',
+        toggleState: TOGGLE.INCREASING,
         isReverse: true,
       });
       this.setState({
-        toggleState: TOGGLE.EXPANDING,
-        isAnimating: this._state_.isAnimating,
+        toggleState: TOGGLE.INCREASING,
       });
-      this.expand();
+      this.increaseEvent();
     }
   };
 
@@ -139,89 +106,55 @@ export default class FuzzyToggle extends React.Component {
     return durationNumber;
   };
 
-  getFunctionName(fn) {
-    return /function ([^(]*)/.exec(fn + '')[1];
-  }
-
-  setEaseFunction = ({ easeIn, easeOut }) => {
-    const result = {};
-    if (typeof easeIn === FUNCTION) {
-      this._state_.easeIn = easeIn;
-      result.easeInName = this.getFunctionName(easeIn);
-    }
-    if (typeof easeOut === FUNCTION) {
-      this._state_.easeOut = easeOut;
-      result.easeOutName = this.getFunctionName(easeOut);
-    }
-    return result;
-  };
-
-  setCollapsedState = () => {
-    this._state_.collasibleElement.style.display = 'none';
-    this._state_.collasibleElement.style.height = '';
-    this._state_.toggleState = TOGGLE.COLLAPSED;
-    this._state_.isAnimating = false;
+  setToEmptyState = () => {
+    this._state_.toggleState = TOGGLE.EMPTY;
     this.setState({
-      toggleState: TOGGLE.COLLAPSED,
-      isAnimating: this._state_.isAnimating,
+      toggleState: TOGGLE.EMPTY,
+      range: 0,
     });
   };
 
-  collapse = () => {
-    if (!this._state_.collasibleElement) {
-      warn('no collapsibleElement');
-      return;
-    }
-    if (this._state_.toggleState !== TOGGLE.COLLAPSING) {
+  decreaseEvent = () => {
+    if (this._state_.toggleState !== TOGGLE.DECREASING) {
       return;
     }
 
-    const { duration, easeIn, startAnimationTime, boxHeight } = this._state_;
-    const now = new Date().getTime();
-    const elapsedTime = Math.min(duration, now - startAnimationTime);
+    const { duration, startTime } = this._state_;
+    const elapsedTime = Math.min(duration, this.now() - startTime);
     const range = elapsedTime / duration;
-    const progress = 1 - easeIn(range);
-    const currentHeightValue = Math.round(boxHeight * progress);
+
+    this.setState({ range });
 
     if (elapsedTime < duration) {
-      this._state_.collasibleElement.style.height = `${currentHeightValue}px`;
-      this._state_.timeout = this.nextTick(this.collapse);
+      this._state_.timeout = this.nextTick(this.decreaseEvent);
     } else {
-      this.setCollapsedState();
+      this.setToEmptyState();
     }
   };
 
-  setExpandedState = () => {
-    this._state_.collasibleElement.style.height = '';
-    this._state_.toggleState = TOGGLE.EXPANDED;
-    this._state_.isAnimating = false;
+  setToFullState = () => {
+    this._state_.toggleState = TOGGLE.FULL;
     this.setState({
-      toggleState: TOGGLE.EXPANDED,
-      isAnimating: this._state_.isAnimating,
+      toggleState: TOGGLE.FULL,
+      range: 1,
     });
   };
 
-  expand = () => {
-    if (!this._state_.collasibleElement) {
-      warn('no collapsibleElement');
-      return;
-    }
-    if (this._state_.toggleState !== TOGGLE.EXPANDING) {
+  increaseEvent = () => {
+    if (this._state_.toggleState !== TOGGLE.INCREASING) {
       return;
     }
 
-    const { duration, startAnimationTime, easeOut, boxHeight } = this._state_;
-    const now = new Date().getTime();
-    const elapsedTime = Math.min(duration, now - startAnimationTime);
+    const { duration, startTime } = this._state_;
+    const elapsedTime = Math.min(duration, this.now() - startTime);
     const range = elapsedTime / duration;
-    const progress = easeOut(range);
-    const currentHeightValue = Math.round(boxHeight * progress);
+
+    this.setState({ range });
 
     if (elapsedTime < duration) {
-      this._state_.collasibleElement.style.height = `${currentHeightValue}px`;
-      this.nextTick(this.expand);
+      this.nextTick(this.increaseEvent);
     } else {
-      this.setExpandedState();
+      this.setToFullState();
     }
   };
 
@@ -230,28 +163,20 @@ export default class FuzzyToggle extends React.Component {
   };
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.easeIn !== this.props.easeIn) {
-      const { easeInName } = this.setEaseFunction({
-        easeIn: nextProps.easeIn,
-      });
-      this.setState({ easeInName });
-    }
-    if (nextProps.easeOut !== this.props.easeOut) {
-      const { easeOutName } = this.setEaseFunction({
-        easeOut: nextProps.easeOut,
-      });
-      this.setState({ easeOutName });
-    }
     if (nextProps.duration !== this.props.duration) {
       const duration = this.setDuration(nextProps.duration);
       this.setState({ duration });
     }
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    return true;
+    //return nextState.value !== this.state.value;
+  }
+
   render() {
     return this.props.render({
       onToggle: this.onToggle,
-      setCollasibleElement: this.setCollapsibleElement,
       state: this.state,
     });
   }
