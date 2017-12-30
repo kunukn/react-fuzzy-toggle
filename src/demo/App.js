@@ -64,7 +64,7 @@ export default class App extends React.Component {
       <FuzzyToggle
         key={'demo'}
         duration={500}
-        render={({ onToggle, state }) => 
+        render={({ onToggle, state }) => (
           <div className="fuzzy-toggle">
             <div className="fuzzy-toggle__header">
               <button className="fuzzy-toggle__button" onClick={onToggle}>
@@ -76,7 +76,7 @@ export default class App extends React.Component {
               <div>{state.toggleState}</div>
             </div>
           </div>
-        }
+        )}
       />
     );
 
