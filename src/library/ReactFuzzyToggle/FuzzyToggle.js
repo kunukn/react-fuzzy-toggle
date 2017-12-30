@@ -1,5 +1,6 @@
 /*
-  _state_ is internal state, used for minimize unnessary re-renderings.
+  _state_ is internal state.
+  used for minimizing unnessary re-renderings.
 */
 
 import React from 'react';
@@ -26,11 +27,19 @@ export default class FuzzyToggle extends React.Component {
   static defaultProps = {
     duration: 300,
     isFull: true,
+    onFull: null,
+    onEmpty: null,
+    onDecreasing: null,
+    onDecreasing: null,
   };
 
   // static propTypes = {
   //   duration: PropTypes.number,
   //   isFull: PropTypes.bool,
+  //   onFull: PropTypes.func,
+  //   onEmpty: PropTypes.func,
+  //   onDecreasing: PropTypes.func,
+  //   onDecreasing: PropTypes.func,
   // };
 
   constructor(props) {
@@ -57,9 +66,9 @@ export default class FuzzyToggle extends React.Component {
   onToggle = () => {
     const update_State_ = ({ toggleState, isReverse }) => {
       const now = this.now();
-      
+
       this._state_.toggleState = toggleState;
-      
+
       if (isReverse) {
         const { duration, startTime } = this._state_;
         const elapsedTime = Math.min(duration, now - startTime);
@@ -72,30 +81,42 @@ export default class FuzzyToggle extends React.Component {
 
     if (this._state_.toggleState === TOGGLE.FULL) {
       update_State_({ toggleState: TOGGLE.DECREASING });
-      this.setState({
-        toggleState: TOGGLE.DECREASING,
-      });
+      this.setState(
+        {
+          toggleState: TOGGLE.DECREASING,
+        },
+        () => this.props.onDecreasing && this.props.onDecreasing()
+      );
       this.decreaseEvent();
     } else if (this._state_.toggleState === TOGGLE.EMPTY) {
       update_State_({ toggleState: TOGGLE.INCREASING });
-      this.setState({
-        toggleState: TOGGLE.INCREASING,
-      });
+      this.setState(
+        {
+          toggleState: TOGGLE.INCREASING,
+        },
+        () => this.props.onIncreasing && this.props.onIncreasing()
+      );
       this.increaseEvent();
     } else if (this._state_.toggleState === TOGGLE.INCREASING) {
       update_State_({ toggleState: TOGGLE.DECREASING, isReverse: true });
-      this.setState({
-        toggleState: TOGGLE.DECREASING,
-      });
+      this.setState(
+        {
+          toggleState: TOGGLE.DECREASING,
+        },
+        () => this.props.onDecreasing && this.props.onDecreasing()
+      );
       this.decreaseEvent();
     } else if (this._state_.toggleState === TOGGLE.DECREASING) {
       update_State_({
         toggleState: TOGGLE.INCREASING,
         isReverse: true,
       });
-      this.setState({
-        toggleState: TOGGLE.INCREASING,
-      });
+      this.setState(
+        {
+          toggleState: TOGGLE.INCREASING,
+        },
+        () => this.props.onIncreasing && this.props.onIncreasing()
+      );
       this.increaseEvent();
     }
   };
@@ -108,10 +129,13 @@ export default class FuzzyToggle extends React.Component {
 
   setToEmptyState = () => {
     this._state_.toggleState = TOGGLE.EMPTY;
-    this.setState({
-      toggleState: TOGGLE.EMPTY,
-      range: 0,
-    });
+    this.setState(
+      {
+        toggleState: TOGGLE.EMPTY,
+        range: 0,
+      },
+      () => this.props.onEmpty && this.props.onEmpty()
+    );
   };
 
   decreaseEvent = () => {
@@ -121,7 +145,7 @@ export default class FuzzyToggle extends React.Component {
 
     const { duration, startTime } = this._state_;
     const elapsedTime = Math.min(duration, this.now() - startTime);
-    const range = elapsedTime / duration;
+    const range = 1 - elapsedTime / duration;
 
     this.setState({ range });
 
@@ -134,10 +158,13 @@ export default class FuzzyToggle extends React.Component {
 
   setToFullState = () => {
     this._state_.toggleState = TOGGLE.FULL;
-    this.setState({
-      toggleState: TOGGLE.FULL,
-      range: 1,
-    });
+    this.setState(
+      {
+        toggleState: TOGGLE.FULL,
+        range: 1,
+      },
+      () => this.props.onFull && this.props.onFull()
+    );
   };
 
   increaseEvent = () => {
@@ -170,8 +197,7 @@ export default class FuzzyToggle extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return true;
-    //return nextState.value !== this.state.value;
+    return nextState.range !== this.state.range;
   }
 
   render() {

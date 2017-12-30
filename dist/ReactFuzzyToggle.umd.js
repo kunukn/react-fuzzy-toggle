@@ -121,12 +121,15 @@ var _react2 = _interopRequireDefault(_react);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 _state_ is internal state, used for minimize unnessary re-renderings.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 _state_ is internal state.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 used for minimizing unnessary re-renderings.
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 
 //import PropTypes from 'prop-types';
@@ -152,6 +155,10 @@ var FuzzyToggle = function (_React$Component) {
   // static propTypes = {
   //   duration: PropTypes.number,
   //   isFull: PropTypes.bool,
+  //   onFull: PropTypes.func,
+  //   onEmpty: PropTypes.func,
+  //   onDecreasing: PropTypes.func,
+  //   onDecreasing: PropTypes.func,
   // };
 
   function FuzzyToggle(props) {
@@ -185,18 +192,24 @@ var FuzzyToggle = function (_React$Component) {
         update_State_({ toggleState: TOGGLE.DECREASING });
         _this.setState({
           toggleState: TOGGLE.DECREASING
+        }, function () {
+          return _this.props.onDecreasing && _this.props.onDecreasing();
         });
         _this.decreaseEvent();
       } else if (_this._state_.toggleState === TOGGLE.EMPTY) {
         update_State_({ toggleState: TOGGLE.INCREASING });
         _this.setState({
           toggleState: TOGGLE.INCREASING
+        }, function () {
+          return _this.props.onIncreasing && _this.props.onIncreasing();
         });
         _this.increaseEvent();
       } else if (_this._state_.toggleState === TOGGLE.INCREASING) {
         update_State_({ toggleState: TOGGLE.DECREASING, isReverse: true });
         _this.setState({
           toggleState: TOGGLE.DECREASING
+        }, function () {
+          return _this.props.onDecreasing && _this.props.onDecreasing();
         });
         _this.decreaseEvent();
       } else if (_this._state_.toggleState === TOGGLE.DECREASING) {
@@ -206,6 +219,8 @@ var FuzzyToggle = function (_React$Component) {
         });
         _this.setState({
           toggleState: TOGGLE.INCREASING
+        }, function () {
+          return _this.props.onIncreasing && _this.props.onIncreasing();
         });
         _this.increaseEvent();
       }
@@ -222,6 +237,8 @@ var FuzzyToggle = function (_React$Component) {
       _this.setState({
         toggleState: TOGGLE.EMPTY,
         range: 0
+      }, function () {
+        return _this.props.onEmpty && _this.props.onEmpty();
       });
     };
 
@@ -235,7 +252,7 @@ var FuzzyToggle = function (_React$Component) {
           startTime = _this$_state_2.startTime;
 
       var elapsedTime = Math.min(duration, _this.now() - startTime);
-      var range = elapsedTime / duration;
+      var range = 1 - elapsedTime / duration;
 
       _this.setState({ range: range });
 
@@ -251,6 +268,8 @@ var FuzzyToggle = function (_React$Component) {
       _this.setState({
         toggleState: TOGGLE.FULL,
         range: 1
+      }, function () {
+        return _this.props.onFull && _this.props.onFull();
       });
     };
 
@@ -310,8 +329,7 @@ var FuzzyToggle = function (_React$Component) {
   }, {
     key: 'shouldComponentUpdate',
     value: function shouldComponentUpdate(nextProps, nextState) {
-      return true;
-      //return nextState.value !== this.state.value;
+      return nextState.range !== this.state.range;
     }
   }, {
     key: 'render',
@@ -331,10 +349,13 @@ var FuzzyToggle = function (_React$Component) {
   return FuzzyToggle;
 }(_react2.default.Component);
 
-FuzzyToggle.defaultProps = {
+FuzzyToggle.defaultProps = _defineProperty({
   duration: 300,
-  isFull: true
-};
+  isFull: true,
+  onFull: null,
+  onEmpty: null,
+  onDecreasing: null
+}, 'onDecreasing', null);
 exports.default = FuzzyToggle;
 
 /***/ }),

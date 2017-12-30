@@ -1,7 +1,9 @@
 import React from 'react';
+import eases from 'eases';
 import { FuzzyToggle } from '../library/ReactFuzzyToggle';
 
-const round = val => val.toFixed(2);
+const round = val => val.toFixed(1);
+const ease = eases['quartInOut'];
 
 export default class App extends React.Component {
   state = { duration: 1000 };
@@ -17,6 +19,13 @@ export default class App extends React.Component {
         <div className="fuzzy-toggle__box">
           <div>{round(state.range)}</div>
           <div>{state.toggleState}</div>
+          <div className="visual">
+          <div className="visual__indicator"
+            style={{
+              transform: `scale3d(${ease(state.range)}, 1, 1)`,
+            }}
+          ></div>
+          </div>
         </div>
       </div>
     );
@@ -28,6 +37,10 @@ export default class App extends React.Component {
         key={components.length}
         duration={this.state.duration}
         render={generateMarkup}
+        onFull={()=>console.log('onFull')}
+        onEmpty={()=>console.log('onEmpty')}
+        onIncreasing={()=>console.log('onIncreasing')}
+        onDecreasing={()=>console.log('onDecreasing')}
       />
     );
     components.push(
