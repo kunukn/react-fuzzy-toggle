@@ -10,7 +10,7 @@
     "dev": "webpack-dev-server --env.dev --progress --config webpack.config.js",
     "build": "webpack --config webpack.config.build.js",
     "clean": "rimraf dist/*",
-    "minify": "npm run minify-umd & npm run minify-var",
+    "minify": "npm run minify-umd",
     "minify-umd": "uglifyjs dist/ReactFuzzyToggle.umd.js --config-file uglify.config.json --output dist/ReactFuzzyToggle.umd.min.js",
     "minify-var": "uglifyjs dist/ReactFuzzyToggle.var.js --config-file uglify.config.json --output dist/ReactFuzzyToggle.var.min.js",
     "deploy": "npm run clean && npm run build && npm run minify"
