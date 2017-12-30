@@ -1,6 +1,6 @@
 /*
   _state_ is internal state.
-  used for minimizing unnessary re-renderings.
+  used for minimizing unnessary re-renderings and because setState is async.
 */
 
 import React from 'react';
@@ -54,7 +54,6 @@ export default class FuzzyToggle extends React.Component {
 
     this.state = {
       toggleState: this._state_.toggleState,
-      duration: this._state_.duration,
       range: this._state_.range,
     };
   }
@@ -63,7 +62,21 @@ export default class FuzzyToggle extends React.Component {
     return new Date().getTime();
   }
 
+  onFull = () => {
+    this.props.onFull && this.props.onFull();
+  };
+  onEmpty = () => {
+    this.props.onEmpty && this.props.onEmpty();
+  };
+  onIncreasing = () => {
+    this.props.onIncreasing && this.props.onIncreasing();
+  };
+  onDecreasing = () => {
+    this.props.onDecreasing && this.props.onDecreasing();
+  };
+
   onToggle = () => {
+ 
     const update_State_ = ({ toggleState, isReverse }) => {
       const now = this.now();
 
@@ -79,63 +92,47 @@ export default class FuzzyToggle extends React.Component {
       }
     };
 
+    const doIncrease = () => {
+      this.setState({ toggleState: TOGGLE.INCREASING });
+      this.onIncreasing();
+      this.increaseEvent();
+    }
+
+    const doDecrease = () => {
+      this.setState({ toggleState: TOGGLE.DECREASING });
+      this.onDecreasing();
+      this.decreaseEvent();
+    }
+
     if (this._state_.toggleState === TOGGLE.FULL) {
       update_State_({ toggleState: TOGGLE.DECREASING });
-      this.setState(
-        {
-          toggleState: TOGGLE.DECREASING,
-        },
-        () => this.props.onDecreasing && this.props.onDecreasing()
-      );
-      this.decreaseEvent();
+      doDecrease();
     } else if (this._state_.toggleState === TOGGLE.EMPTY) {
       update_State_({ toggleState: TOGGLE.INCREASING });
-      this.setState(
-        {
-          toggleState: TOGGLE.INCREASING,
-        },
-        () => this.props.onIncreasing && this.props.onIncreasing()
-      );
-      this.increaseEvent();
+      doIncrease();
     } else if (this._state_.toggleState === TOGGLE.INCREASING) {
       update_State_({ toggleState: TOGGLE.DECREASING, isReverse: true });
-      this.setState(
-        {
-          toggleState: TOGGLE.DECREASING,
-        },
-        () => this.props.onDecreasing && this.props.onDecreasing()
-      );
-      this.decreaseEvent();
+      doDecrease();
     } else if (this._state_.toggleState === TOGGLE.DECREASING) {
       update_State_({
         toggleState: TOGGLE.INCREASING,
         isReverse: true,
       });
-      this.setState(
-        {
-          toggleState: TOGGLE.INCREASING,
-        },
-        () => this.props.onIncreasing && this.props.onIncreasing()
-      );
-      this.increaseEvent();
+      doIncrease();
     }
   };
 
   setDuration = duration => {
-    const durationNumber = parseInt(duration, 10) || 0;
-    this._state_.duration = durationNumber;
-    return durationNumber;
+    this._state_.duration = parseInt(duration, 10) || 0;
   };
 
   setToEmptyState = () => {
     this._state_.toggleState = TOGGLE.EMPTY;
-    this.setState(
-      {
-        toggleState: TOGGLE.EMPTY,
-        range: 0,
-      },
-      () => this.props.onEmpty && this.props.onEmpty()
-    );
+    this.setState({
+      toggleState: TOGGLE.EMPTY,
+      range: 0,
+    });
+    this.onEmpty();
   };
 
   decreaseEvent = () => {
@@ -158,13 +155,11 @@ export default class FuzzyToggle extends React.Component {
 
   setToFullState = () => {
     this._state_.toggleState = TOGGLE.FULL;
-    this.setState(
-      {
-        toggleState: TOGGLE.FULL,
-        range: 1,
-      },
-      () => this.props.onFull && this.props.onFull()
-    );
+    this.setState({
+      toggleState: TOGGLE.FULL,
+      range: 1,
+    });
+    this.onFull();
   };
 
   increaseEvent = () => {
@@ -191,8 +186,7 @@ export default class FuzzyToggle extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.duration !== this.props.duration) {
-      const duration = this.setDuration(nextProps.duration);
-      this.setState({ duration });
+      this.setDuration(nextProps.duration);
     }
   }
 

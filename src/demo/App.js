@@ -2,52 +2,58 @@ import React from 'react';
 import eases from 'eases';
 import { FuzzyToggle } from '../library/ReactFuzzyToggle';
 
+const log = console.log.bind(console);
+const __ = null;
 const round = val => val.toFixed(1);
-const ease = eases['quartInOut'];
+const quartInOut = eases['quartInOut'];
+
+window.easeNames = Object.keys(eases);
 
 export default class App extends React.Component {
   state = { duration: 1000 };
 
-  render() {
-    const generateMarkup = ({ onToggle, state }) => (
-      <div className="fuzzy-toggle">
-        <div className="fuzzy-toggle__header">
-          <button className="fuzzy-toggle__button" onClick={onToggle}>
-            toggle
-          </button>
-        </div>
-        <div className="fuzzy-toggle__box">
-          <div>{round(state.range)}</div>
-          <div>{state.toggleState}</div>
-          <div className="visual">
-          <div className="visual__indicator"
+  generateMarkupWithEase = (ease, easeName) => ({ onToggle, state }) => (
+    <div className="fuzzy-toggle">
+      <div className="fuzzy-toggle__header">
+        <button className="fuzzy-toggle__button" onClick={onToggle}>
+          toggle
+        </button>
+      </div>
+      <div className="fuzzy-toggle__box">
+        <div>{round(state.range)}</div>
+        <div>{state.toggleState}</div>
+        <div>{easeName}</div>
+        <div className="visual">
+          <div
+            className="visual__indicator"
             style={{
               transform: `scale3d(${ease(state.range)}, 1, 1)`,
             }}
-          ></div>
-          </div>
+          />
         </div>
       </div>
-    );
+    </div>
+  );
 
+  render() {
     const components = [];
 
     components.push(
       <FuzzyToggle
         key={components.length}
         duration={this.state.duration}
-        render={generateMarkup}
-        onFull={()=>console.log('onFull')}
-        onEmpty={()=>console.log('onEmpty')}
-        onIncreasing={()=>console.log('onIncreasing')}
-        onDecreasing={()=>console.log('onDecreasing')}
+        render={this.generateMarkupWithEase(eases['quartInOut'], 'quartInOut')}
+        onFull={log.bind(__,'onFull')}
+        onEmpty={log.bind(__,'onEmpty')}
+        onIncreasing={log.bind(__,'onIncreasing')}
+        onDecreasing={log.bind(__,'onDecreasing')}
       />
     );
     components.push(
       <FuzzyToggle
         key={components.length}
         duration={this.state.duration}
-        render={generateMarkup}
+        render={this.generateMarkupWithEase(eases['bounceInOut'], 'bounceInOut')}
       />
     );
 
@@ -55,7 +61,7 @@ export default class App extends React.Component {
       <FuzzyToggle
         key={components.length}
         duration={this.state.duration}
-        render={generateMarkup}
+        render={this.generateMarkupWithEase(eases['quadInOut'], 'quadInOut')}
       />
     );
 

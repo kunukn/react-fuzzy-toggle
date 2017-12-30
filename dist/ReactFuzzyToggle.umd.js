@@ -129,7 +129,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  _state_ is internal state.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 used for minimizing unnessary re-renderings.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 used for minimizing unnessary re-renderings and because setState is async.
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 
 //import PropTypes from 'prop-types';
@@ -166,7 +166,24 @@ var FuzzyToggle = function (_React$Component) {
 
     var _this = _possibleConstructorReturn(this, (FuzzyToggle.__proto__ || Object.getPrototypeOf(FuzzyToggle)).call(this, props));
 
+    _this.onFull = function () {
+      _this.props.onFull && _this.props.onFull();
+    };
+
+    _this.onEmpty = function () {
+      _this.props.onEmpty && _this.props.onEmpty();
+    };
+
+    _this.onIncreasing = function () {
+      _this.props.onIncreasing && _this.props.onIncreasing();
+    };
+
+    _this.onDecreasing = function () {
+      _this.props.onDecreasing && _this.props.onDecreasing();
+    };
+
     _this.onToggle = function () {
+
       var update_State_ = function update_State_(_ref) {
         var toggleState = _ref.toggleState,
             isReverse = _ref.isReverse;
@@ -188,48 +205,38 @@ var FuzzyToggle = function (_React$Component) {
         }
       };
 
+      var doIncrease = function doIncrease() {
+        _this.setState({ toggleState: TOGGLE.INCREASING });
+        _this.onIncreasing();
+        _this.increaseEvent();
+      };
+
+      var doDecrease = function doDecrease() {
+        _this.setState({ toggleState: TOGGLE.DECREASING });
+        _this.onDecreasing();
+        _this.decreaseEvent();
+      };
+
       if (_this._state_.toggleState === TOGGLE.FULL) {
         update_State_({ toggleState: TOGGLE.DECREASING });
-        _this.setState({
-          toggleState: TOGGLE.DECREASING
-        }, function () {
-          return _this.props.onDecreasing && _this.props.onDecreasing();
-        });
-        _this.decreaseEvent();
+        doDecrease();
       } else if (_this._state_.toggleState === TOGGLE.EMPTY) {
         update_State_({ toggleState: TOGGLE.INCREASING });
-        _this.setState({
-          toggleState: TOGGLE.INCREASING
-        }, function () {
-          return _this.props.onIncreasing && _this.props.onIncreasing();
-        });
-        _this.increaseEvent();
+        doIncrease();
       } else if (_this._state_.toggleState === TOGGLE.INCREASING) {
         update_State_({ toggleState: TOGGLE.DECREASING, isReverse: true });
-        _this.setState({
-          toggleState: TOGGLE.DECREASING
-        }, function () {
-          return _this.props.onDecreasing && _this.props.onDecreasing();
-        });
-        _this.decreaseEvent();
+        doDecrease();
       } else if (_this._state_.toggleState === TOGGLE.DECREASING) {
         update_State_({
           toggleState: TOGGLE.INCREASING,
           isReverse: true
         });
-        _this.setState({
-          toggleState: TOGGLE.INCREASING
-        }, function () {
-          return _this.props.onIncreasing && _this.props.onIncreasing();
-        });
-        _this.increaseEvent();
+        doIncrease();
       }
     };
 
     _this.setDuration = function (duration) {
-      var durationNumber = parseInt(duration, 10) || 0;
-      _this._state_.duration = durationNumber;
-      return durationNumber;
+      _this._state_.duration = parseInt(duration, 10) || 0;
     };
 
     _this.setToEmptyState = function () {
@@ -237,9 +244,8 @@ var FuzzyToggle = function (_React$Component) {
       _this.setState({
         toggleState: TOGGLE.EMPTY,
         range: 0
-      }, function () {
-        return _this.props.onEmpty && _this.props.onEmpty();
       });
+      _this.onEmpty();
     };
 
     _this.decreaseEvent = function () {
@@ -268,9 +274,8 @@ var FuzzyToggle = function (_React$Component) {
       _this.setState({
         toggleState: TOGGLE.FULL,
         range: 1
-      }, function () {
-        return _this.props.onFull && _this.props.onFull();
       });
+      _this.onFull();
     };
 
     _this.increaseEvent = function () {
@@ -307,7 +312,6 @@ var FuzzyToggle = function (_React$Component) {
 
     _this.state = {
       toggleState: _this._state_.toggleState,
-      duration: _this._state_.duration,
       range: _this._state_.range
     };
     return _this;
@@ -322,8 +326,7 @@ var FuzzyToggle = function (_React$Component) {
     key: 'componentWillReceiveProps',
     value: function componentWillReceiveProps(nextProps) {
       if (nextProps.duration !== this.props.duration) {
-        var duration = this.setDuration(nextProps.duration);
-        this.setState({ duration: duration });
+        this.setDuration(nextProps.duration);
       }
     }
   }, {
