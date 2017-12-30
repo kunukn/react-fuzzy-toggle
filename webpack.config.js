@@ -54,7 +54,7 @@ module.exports = (env = {}) => {
       open: true,
       contentBase: './',
       noInfo: true,
-      port: 3399,
+      port: 3377,
       compress: false,
       inline: true,
       //hot: true,

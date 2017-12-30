@@ -134,9 +134,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 //import PropTypes from 'prop-types';
 
-var log = console.log.bind(console);
-var warn = console.warn.bind(console);
-
 var rAF = window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : function (callback) {
   return window.setTimeout(callback, 16);
 };
@@ -153,8 +150,9 @@ var FuzzyToggle = function (_React$Component) {
   _inherits(FuzzyToggle, _React$Component);
 
   // static propTypes = {
+  //   render: PropTypes.func.isRequired,
   //   duration: PropTypes.number,
-  //   isFull: PropTypes.bool,
+  //   isEmpty: PropTypes.bool,
   //   onFull: PropTypes.func,
   //   onEmpty: PropTypes.func,
   //   onDecreasing: PropTypes.func,
@@ -183,7 +181,6 @@ var FuzzyToggle = function (_React$Component) {
     };
 
     _this.onToggle = function () {
-
       var update_State_ = function update_State_(_ref) {
         var toggleState = _ref.toggleState,
             isReverse = _ref.isReverse;
@@ -206,13 +203,17 @@ var FuzzyToggle = function (_React$Component) {
       };
 
       var doIncrease = function doIncrease() {
-        _this.setState({ toggleState: TOGGLE.INCREASING });
+        _this.setState({
+          toggleState: TOGGLE.INCREASING
+        });
         _this.onIncreasing();
         _this.increaseEvent();
       };
 
       var doDecrease = function doDecrease() {
-        _this.setState({ toggleState: TOGGLE.DECREASING });
+        _this.setState({
+          toggleState: TOGGLE.DECREASING
+        });
         _this.onDecreasing();
         _this.decreaseEvent();
       };
@@ -236,15 +237,15 @@ var FuzzyToggle = function (_React$Component) {
     };
 
     _this.setDuration = function (duration) {
-      _this._state_.duration = parseInt(duration, 10) || 0;
+      _this._state_.duration = Math.max(parseInt(duration, 10) || 0, 1);
     };
 
     _this.setToEmptyState = function () {
-      _this._state_.toggleState = TOGGLE.EMPTY;
       _this.setState({
-        toggleState: TOGGLE.EMPTY,
-        range: 0
+        range: 0,
+        toggleState: TOGGLE.EMPTY
       });
+      _this._state_.toggleState = TOGGLE.EMPTY;
       _this.onEmpty();
     };
 
@@ -270,11 +271,11 @@ var FuzzyToggle = function (_React$Component) {
     };
 
     _this.setToFullState = function () {
-      _this._state_.toggleState = TOGGLE.FULL;
       _this.setState({
-        toggleState: TOGGLE.FULL,
-        range: 1
+        range: 1,
+        toggleState: TOGGLE.FULL
       });
+      _this._state_.toggleState = TOGGLE.FULL;
       _this.onFull();
     };
 
@@ -304,23 +305,37 @@ var FuzzyToggle = function (_React$Component) {
     };
 
     _this._state_ = {
-      toggleState: _this.props.isFull ? TOGGLE.FULL : TOGGLE.EMPTY,
-      range: _this.props.isFull ? 1 : 0
+      toggleState: _this.props.isEmpty ? TOGGLE.EMPTY : TOGGLE.FULL
     };
 
     _this.setDuration(_this.props.duration);
 
     _this.state = {
       toggleState: _this._state_.toggleState,
-      range: _this._state_.range
+      range: _this.props.isEmpty ? 0 : 1
     };
     return _this;
   }
 
   _createClass(FuzzyToggle, [{
+    key: 'render',
+    value: function render() {
+      return this.props.render({
+        onToggle: this.onToggle,
+        toggleState: this.state.toggleState,
+        isFuzzy: this.isFuzzy(this.state.toggleState),
+        range: this.state.range
+      });
+    }
+  }, {
     key: 'now',
     value: function now() {
       return new Date().getTime();
+    }
+  }, {
+    key: 'isFuzzy',
+    value: function isFuzzy(state) {
+      return state === TOGGLE.INCREASING || state === TOGGLE.DECREASING;
     }
   }, {
     key: 'componentWillReceiveProps',
@@ -328,19 +343,6 @@ var FuzzyToggle = function (_React$Component) {
       if (nextProps.duration !== this.props.duration) {
         this.setDuration(nextProps.duration);
       }
-    }
-  }, {
-    key: 'shouldComponentUpdate',
-    value: function shouldComponentUpdate(nextProps, nextState) {
-      return nextState.range !== this.state.range;
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      return this.props.render({
-        onToggle: this.onToggle,
-        state: this.state
-      });
     }
   }, {
     key: 'componentWillUnmount',
@@ -354,7 +356,7 @@ var FuzzyToggle = function (_React$Component) {
 
 FuzzyToggle.defaultProps = _defineProperty({
   duration: 300,
-  isFull: true,
+  isEmpty: false,
   onFull: null,
   onEmpty: null,
   onDecreasing: null

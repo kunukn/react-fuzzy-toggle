@@ -6,9 +6,6 @@
 import React from 'react';
 //import PropTypes from 'prop-types';
 
-const log = console.log.bind(console);
-const warn = console.warn.bind(console);
-
 const rAF = window.requestAnimationFrame
   ? window.requestAnimationFrame.bind(window)
   : callback => window.setTimeout(callback, 16);
@@ -26,7 +23,7 @@ const TOGGLE = {
 export default class FuzzyToggle extends React.Component {
   static defaultProps = {
     duration: 300,
-    isFull: true,
+    isEmpty: false,
     onFull: null,
     onEmpty: null,
     onDecreasing: null,
@@ -34,8 +31,9 @@ export default class FuzzyToggle extends React.Component {
   };
 
   // static propTypes = {
+  //   render: PropTypes.func.isRequired,
   //   duration: PropTypes.number,
-  //   isFull: PropTypes.bool,
+  //   isEmpty: PropTypes.bool,
   //   onFull: PropTypes.func,
   //   onEmpty: PropTypes.func,
   //   onDecreasing: PropTypes.func,
@@ -46,16 +44,24 @@ export default class FuzzyToggle extends React.Component {
     super(props);
 
     this._state_ = {
-      toggleState: this.props.isFull ? TOGGLE.FULL : TOGGLE.EMPTY,
-      range: this.props.isFull ? 1 : 0,
+      toggleState: this.props.isEmpty ? TOGGLE.EMPTY : TOGGLE.FULL,
     };
 
     this.setDuration(this.props.duration);
 
     this.state = {
       toggleState: this._state_.toggleState,
-      range: this._state_.range,
+      range: this.props.isEmpty ? 0 : 1,
     };
+  }
+
+  render() {
+    return this.props.render({
+      onToggle: this.onToggle,
+      toggleState: this.state.toggleState,
+      isFuzzy: this.isFuzzy(this.state.toggleState),
+      range: this.state.range,
+    });
   }
 
   now() {
@@ -76,7 +82,6 @@ export default class FuzzyToggle extends React.Component {
   };
 
   onToggle = () => {
- 
     const update_State_ = ({ toggleState, isReverse }) => {
       const now = this.now();
 
@@ -93,16 +98,20 @@ export default class FuzzyToggle extends React.Component {
     };
 
     const doIncrease = () => {
-      this.setState({ toggleState: TOGGLE.INCREASING });
+      this.setState({
+        toggleState: TOGGLE.INCREASING,
+      });
       this.onIncreasing();
       this.increaseEvent();
-    }
+    };
 
     const doDecrease = () => {
-      this.setState({ toggleState: TOGGLE.DECREASING });
+      this.setState({
+        toggleState: TOGGLE.DECREASING,
+      });
       this.onDecreasing();
       this.decreaseEvent();
-    }
+    };
 
     if (this._state_.toggleState === TOGGLE.FULL) {
       update_State_({ toggleState: TOGGLE.DECREASING });
@@ -123,15 +132,15 @@ export default class FuzzyToggle extends React.Component {
   };
 
   setDuration = duration => {
-    this._state_.duration = parseInt(duration, 10) || 0;
+    this._state_.duration = Math.max(parseInt(duration, 10) || 0, 1);
   };
 
   setToEmptyState = () => {
-    this._state_.toggleState = TOGGLE.EMPTY;
     this.setState({
-      toggleState: TOGGLE.EMPTY,
       range: 0,
+      toggleState: TOGGLE.EMPTY,
     });
+    this._state_.toggleState = TOGGLE.EMPTY;
     this.onEmpty();
   };
 
@@ -154,11 +163,11 @@ export default class FuzzyToggle extends React.Component {
   };
 
   setToFullState = () => {
-    this._state_.toggleState = TOGGLE.FULL;
     this.setState({
-      toggleState: TOGGLE.FULL,
       range: 1,
+      toggleState: TOGGLE.FULL,
     });
+    this._state_.toggleState = TOGGLE.FULL;
     this.onFull();
   };
 
@@ -184,21 +193,14 @@ export default class FuzzyToggle extends React.Component {
     this._state_.timeout = rAF(callback);
   };
 
+  isFuzzy(state) {
+    return state === TOGGLE.INCREASING || state === TOGGLE.DECREASING;
+  }
+
   componentWillReceiveProps(nextProps) {
     if (nextProps.duration !== this.props.duration) {
       this.setDuration(nextProps.duration);
     }
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextState.range !== this.state.range;
-  }
-
-  render() {
-    return this.props.render({
-      onToggle: this.onToggle,
-      state: this.state,
-    });
   }
 
   componentWillUnmount() {

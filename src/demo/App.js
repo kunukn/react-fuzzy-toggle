@@ -12,7 +12,7 @@ window.easeNames = Object.keys(eases);
 export default class App extends React.Component {
   state = { duration: 1000 };
 
-  generateMarkupWithEase = (ease, easeName) => ({ onToggle, state }) => (
+  generateMarkupWithEase = (ease, easeName) => ({ onToggle, range, toggleState, isFuzzy }) => (
     <div className="fuzzy-toggle">
       <div className="fuzzy-toggle__header">
         <button className="fuzzy-toggle__button" onClick={onToggle}>
@@ -20,14 +20,14 @@ export default class App extends React.Component {
         </button>
       </div>
       <div className="fuzzy-toggle__box">
-        <div>{round(state.range)}</div>
-        <div>{state.toggleState}</div>
+        <div>{round(range)}</div>
+        <div>{toggleState}</div>
         <div>{easeName}</div>
         <div className="visual">
           <div
             className="visual__indicator"
             style={{
-              transform: `scale3d(${ease(state.range)}, 1, 1)`,
+              transform: `scale3d(${ease(range)}, 1, 1)`,
             }}
           />
         </div>
@@ -63,8 +63,9 @@ export default class App extends React.Component {
     components.push(
       <FuzzyToggle
         key={'demo'}
+        isEmpty
         duration={500}
-        render={({ onToggle, state }) => (
+        render={({ onToggle, range, toggleState, isFuzzy }) => (
           <div className="fuzzy-toggle">
             <div className="fuzzy-toggle__header">
               <button className="fuzzy-toggle__button" onClick={onToggle}>
@@ -72,8 +73,9 @@ export default class App extends React.Component {
               </button>
             </div>
             <div className="fuzzy-toggle__box">
-              <div>{state.range.toFixed(1)}</div>
-              <div>{state.toggleState}</div>
+              <div>range: {range.toFixed(1)}</div>
+              <div>state: {toggleState}</div>
+              <div>isFuzzy: {isFuzzy+''}</div>
             </div>
           </div>
         )}
