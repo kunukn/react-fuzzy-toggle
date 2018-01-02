@@ -45,12 +45,13 @@ export default class FuzzyToggle extends React.Component {
 
     this._state_ = {
       toggleState: this.props.isEmpty ? TOGGLE.EMPTY : TOGGLE.FULL,
+      isReverse: false,
+      duration: this.sanitizeDuration(this.props.duration),
     };
-
-    this.setDuration(this.props.duration);
 
     this.state = {
       toggleState: this._state_.toggleState,
+      isReverse: this._state_.isReverse,
       range: this.props.isEmpty ? 0 : 1,
     };
   }
@@ -61,6 +62,7 @@ export default class FuzzyToggle extends React.Component {
       toggleState: this.state.toggleState,
       isFuzzy: this.isFuzzy(this.state.toggleState),
       range: this.state.range,
+      isReverse: this.state.isReverse,
     });
   }
 
@@ -82,10 +84,11 @@ export default class FuzzyToggle extends React.Component {
   };
 
   onToggle = () => {
-    const update_State_ = ({ toggleState, isReverse }) => {
+    const update_State_ = ({ toggleState, isReverse = false }) => {
       const now = this.now();
 
       this._state_.toggleState = toggleState;
+      this._state_.isReverse = isReverse;
 
       if (isReverse) {
         const { duration, startTime } = this._state_;
@@ -95,20 +98,19 @@ export default class FuzzyToggle extends React.Component {
       } else {
         this._state_.startTime = now;
       }
+
+      this.setState({
+        toggleState,
+        isReverse,
+      });
     };
 
     const doIncrease = () => {
-      this.setState({
-        toggleState: TOGGLE.INCREASING,
-      });
       this.onIncreasing();
       this.increaseEvent();
     };
 
     const doDecrease = () => {
-      this.setState({
-        toggleState: TOGGLE.DECREASING,
-      });
       this.onDecreasing();
       this.decreaseEvent();
     };
@@ -131,9 +133,9 @@ export default class FuzzyToggle extends React.Component {
     }
   };
 
-  setDuration = duration => {
-    this._state_.duration = Math.max(parseInt(duration, 10) || 0, 1);
-  };
+  sanitizeDuration(duration) {
+    return Math.max(parseInt(duration, 10) || 1, 1);
+  }
 
   setToEmptyState = () => {
     this.setState({
@@ -180,7 +182,10 @@ export default class FuzzyToggle extends React.Component {
     const elapsedTime = Math.min(duration, this.now() - startTime);
     const range = elapsedTime / duration;
 
-    this.setState({ range });
+    this.setState({
+      range,
+      isReverse: this._state_.isReverse,
+    });
 
     if (elapsedTime < duration) {
       this.nextTick(this.increaseEvent);
@@ -199,7 +204,7 @@ export default class FuzzyToggle extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.duration !== this.props.duration) {
-      this.setDuration(nextProps.duration);
+      this._state_.duration = this.sanitizeDuration(nextProps.duration);
     }
   }
 

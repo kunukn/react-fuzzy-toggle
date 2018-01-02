@@ -12,7 +12,7 @@ window.easeNames = Object.keys(eases);
 export default class App extends React.Component {
   state = { duration: 1000 };
 
-  generateMarkupWithEase = (ease, easeName) => ({ onToggle, range, toggleState, isFuzzy }) => (
+  generateMarkupWithEase = (ease, easeName) => ({ onToggle, range, toggleState, isFuzzy, isReverse }) => (
     <div className="fuzzy-toggle">
       <div className="fuzzy-toggle__header">
         <button className="fuzzy-toggle__button" onClick={onToggle}>
@@ -21,7 +21,8 @@ export default class App extends React.Component {
       </div>
       <div className="fuzzy-toggle__box">
         <div>{round(range)}</div>
-        <div>{toggleState}</div>
+        <div>toggleState: {toggleState}</div>
+        <div>isReverse: {isReverse+''}</div>
         <div>{easeName}</div>
         <div className="visual">
           <div
