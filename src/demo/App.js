@@ -3,16 +3,19 @@ import eases from 'eases';
 import { FuzzyToggle } from '../library/ReactFuzzyToggle';
 
 const log = console.log.bind(console);
-const __ = null;
 const round = val => val.toFixed(1);
 const quartInOut = eases['quartInOut'];
-
-window.easeNames = Object.keys(eases);
 
 export default class App extends React.Component {
   state = { duration: 1000 };
 
-  generateMarkupWithEase = (ease, easeName) => ({ onToggle, range, toggleState, isFuzzy, isReverse }) => (
+  generateMarkupWithEase = ({ ease, easeName }) => ({
+    onToggle,
+    range,
+    toggleState,
+    isFuzzy,
+    isReverse,
+  }) => (
     <div className="fuzzy-toggle">
       <div className="fuzzy-toggle__header">
         <button className="fuzzy-toggle__button" onClick={onToggle}>
@@ -22,7 +25,7 @@ export default class App extends React.Component {
       <div className="fuzzy-toggle__box">
         <div>{round(range)}</div>
         <div>toggleState: {toggleState}</div>
-        <div>isReverse: {isReverse+''}</div>
+        <div>isReverse: {isReverse + ''}</div>
         <div>{easeName}</div>
         <div className="visual">
           <div
@@ -43,30 +46,33 @@ export default class App extends React.Component {
       <FuzzyToggle
         key={components.length}
         duration={this.state.duration}
-        render={this.generateMarkupWithEase(eases['quartInOut'], 'quartInOut')}
-        onFull={log.bind(__, 'onFull')}
-        onEmpty={log.bind(__, 'onEmpty')}
-        onIncreasing={log.bind(__, 'onIncreasing')}
-        onDecreasing={log.bind(__, 'onDecreasing')}
+        render={this.generateMarkupWithEase({
+          ease: eases['quartInOut'],
+          easeName: 'quartInOut',
+        })}
+        onFull={() => log('onFull')}
+        onEmpty={() => log('onEmpty')}
+        onIncreasing={() => log('onIncreasing')}
+        onDecreasing={() => log('onDecreasing')}
       />
     );
     components.push(
       <FuzzyToggle
         key={components.length}
         duration={this.state.duration}
-        render={this.generateMarkupWithEase(
-          eases['bounceInOut'],
-          'bounceInOut'
-        )}
+        render={this.generateMarkupWithEase({
+          ease: eases['bounceInOut'],
+          easeName: 'bounceInOut',
+        })}
       />
     );
 
     components.push(
       <FuzzyToggle
-        key={'demo'}
+        key={components.length}
         isEmpty
         duration={500}
-        render={({ onToggle, range, toggleState, isFuzzy }) => (
+        render={({ onToggle, range, toggleState, isFuzzy, isReverse }) => (
           <div className="fuzzy-toggle">
             <div className="fuzzy-toggle__header">
               <button className="fuzzy-toggle__button" onClick={onToggle}>
@@ -76,7 +82,7 @@ export default class App extends React.Component {
             <div className="fuzzy-toggle__box">
               <div>range: {range.toFixed(1)}</div>
               <div>state: {toggleState}</div>
-              <div>isFuzzy: {isFuzzy+''}</div>
+              <div>isFuzzy: {isFuzzy + ''}</div>
             </div>
           </div>
         )}

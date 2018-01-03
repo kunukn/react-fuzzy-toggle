@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.0.7
+* update readme
+
 ### 0.0.6
 * add render prop: isReverse
 

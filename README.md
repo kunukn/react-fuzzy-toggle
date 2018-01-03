@@ -19,7 +19,13 @@ import { FuzzyToggle } from 'react-fuzzy-toggle';
   onEmpty={() => {/* optional callback */}}
   onIncreasing={() => {/* optional callback */}}
   onDecreasing={() => {/* optional callback */}}
-  render={({ onToggle, range, toggleState, isFuzzy }) => (
+  render={({ 
+    onToggle, 
+    range, 
+    toggleState, 
+    isFuzzy,
+    isReverse, 
+  }) => (
     <div className="fuzzy-toggle">
       <div className="fuzzy-toggle__header">
         <button className="fuzzy-toggle__button" onClick={onToggle}>
