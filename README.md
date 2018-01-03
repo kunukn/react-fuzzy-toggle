@@ -24,7 +24,7 @@ import { FuzzyToggle } from 'react-fuzzy-toggle';
     range, 
     toggleState, 
     isFuzzy,
-    isReverse, 
+    hasReversed, 
   }) => (
     <div className="fuzzy-toggle">
       <div className="fuzzy-toggle__header">

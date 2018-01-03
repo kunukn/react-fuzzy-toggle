@@ -45,13 +45,13 @@ export default class FuzzyToggle extends React.Component {
 
     this._state_ = {
       toggleState: this.props.isEmpty ? TOGGLE.EMPTY : TOGGLE.FULL,
-      isReverse: false,
+      hasReversed: false,
       duration: this.sanitizeDuration(this.props.duration),
     };
 
     this.state = {
       toggleState: this._state_.toggleState,
-      isReverse: this._state_.isReverse,
+      hasReversed: this._state_.hasReversed,
       range: this.props.isEmpty ? 0 : 1,
     };
   }
@@ -62,7 +62,7 @@ export default class FuzzyToggle extends React.Component {
       toggleState: this.state.toggleState,
       isFuzzy: this.isFuzzy(this.state.toggleState),
       range: this.state.range,
-      isReverse: this.state.isReverse,
+      hasReversed: this.state.hasReversed,
     });
   }
 
@@ -84,13 +84,13 @@ export default class FuzzyToggle extends React.Component {
   };
 
   onToggle = () => {
-    const update_State_ = ({ toggleState, isReverse = false }) => {
+    const update_State_ = ({ toggleState, hasReversed = false }) => {
       const now = this.now();
 
       this._state_.toggleState = toggleState;
-      this._state_.isReverse = isReverse;
+      this._state_.hasReversed = hasReversed;
 
-      if (isReverse) {
+      if (hasReversed) {
         const { duration, startTime } = this._state_;
         const elapsedTime = Math.min(duration, now - startTime);
         const subtract = Math.max(0, duration - elapsedTime);
@@ -101,7 +101,7 @@ export default class FuzzyToggle extends React.Component {
 
       this.setState({
         toggleState,
-        isReverse,
+        hasReversed,
       });
     };
 
@@ -122,12 +122,12 @@ export default class FuzzyToggle extends React.Component {
       update_State_({ toggleState: TOGGLE.INCREASING });
       doIncrease();
     } else if (this._state_.toggleState === TOGGLE.INCREASING) {
-      update_State_({ toggleState: TOGGLE.DECREASING, isReverse: true });
+      update_State_({ toggleState: TOGGLE.DECREASING, hasReversed: true });
       doDecrease();
     } else if (this._state_.toggleState === TOGGLE.DECREASING) {
       update_State_({
         toggleState: TOGGLE.INCREASING,
-        isReverse: true,
+        hasReversed: true,
       });
       doIncrease();
     }
@@ -182,10 +182,7 @@ export default class FuzzyToggle extends React.Component {
     const elapsedTime = Math.min(duration, this.now() - startTime);
     const range = elapsedTime / duration;
 
-    this.setState({
-      range,
-      isReverse: this._state_.isReverse,
-    });
+    this.setState({ range });
 
     if (elapsedTime < duration) {
       this.nextTick(this.increaseEvent);

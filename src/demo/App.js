@@ -14,7 +14,7 @@ export default class App extends React.Component {
     range,
     toggleState,
     isFuzzy,
-    isReverse,
+    hasReversed,
   }) => (
     <div className="fuzzy-toggle">
       <div className="fuzzy-toggle__header">
@@ -25,7 +25,7 @@ export default class App extends React.Component {
       <div className="fuzzy-toggle__box">
         <div>{round(range)}</div>
         <div>toggleState: {toggleState}</div>
-        <div>isReverse: {isReverse + ''}</div>
+        <div>hasReversed: {hasReversed + ''}</div>
         <div>{easeName}</div>
         <div className="visual">
           <div
@@ -45,34 +45,13 @@ export default class App extends React.Component {
     components.push(
       <FuzzyToggle
         key={components.length}
-        duration={this.state.duration}
-        render={this.generateMarkupWithEase({
-          ease: eases['quartInOut'],
-          easeName: 'quartInOut',
-        })}
+        isEmpty
+        duration={500}
         onFull={() => log('onFull')}
         onEmpty={() => log('onEmpty')}
         onIncreasing={() => log('onIncreasing')}
         onDecreasing={() => log('onDecreasing')}
-      />
-    );
-    components.push(
-      <FuzzyToggle
-        key={components.length}
-        duration={this.state.duration}
-        render={this.generateMarkupWithEase({
-          ease: eases['bounceInOut'],
-          easeName: 'bounceInOut',
-        })}
-      />
-    );
-
-    components.push(
-      <FuzzyToggle
-        key={components.length}
-        isEmpty
-        duration={500}
-        render={({ onToggle, range, toggleState, isFuzzy, isReverse }) => (
+        render={({ onToggle, range, toggleState, isFuzzy }) => (
           <div className="fuzzy-toggle">
             <div className="fuzzy-toggle__header">
               <button className="fuzzy-toggle__button" onClick={onToggle}>
@@ -86,6 +65,27 @@ export default class App extends React.Component {
             </div>
           </div>
         )}
+      />
+    );
+
+    components.push(
+      <FuzzyToggle
+        key={components.length}
+        duration={this.state.duration}
+        render={this.generateMarkupWithEase({
+          ease: eases['quartInOut'],
+          easeName: 'quartInOut',
+        })}
+      />
+    );
+    components.push(
+      <FuzzyToggle
+        key={components.length}
+        duration={this.state.duration}
+        render={this.generateMarkupWithEase({
+          ease: eases['bounceInOut'],
+          easeName: 'bounceInOut',
+        })}
       />
     );
 

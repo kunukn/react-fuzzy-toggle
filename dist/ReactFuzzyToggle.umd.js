@@ -183,15 +183,15 @@ var FuzzyToggle = function (_React$Component) {
     _this.onToggle = function () {
       var update_State_ = function update_State_(_ref) {
         var toggleState = _ref.toggleState,
-            _ref$isReverse = _ref.isReverse,
-            isReverse = _ref$isReverse === undefined ? false : _ref$isReverse;
+            _ref$hasReversed = _ref.hasReversed,
+            hasReversed = _ref$hasReversed === undefined ? false : _ref$hasReversed;
 
         var now = _this.now();
 
         _this._state_.toggleState = toggleState;
-        _this._state_.isReverse = isReverse;
+        _this._state_.hasReversed = hasReversed;
 
-        if (isReverse) {
+        if (hasReversed) {
           var _this$_state_ = _this._state_,
               duration = _this$_state_.duration,
               startTime = _this$_state_.startTime;
@@ -205,7 +205,7 @@ var FuzzyToggle = function (_React$Component) {
 
         _this.setState({
           toggleState: toggleState,
-          isReverse: isReverse
+          hasReversed: hasReversed
         });
       };
 
@@ -226,12 +226,12 @@ var FuzzyToggle = function (_React$Component) {
         update_State_({ toggleState: TOGGLE.INCREASING });
         doIncrease();
       } else if (_this._state_.toggleState === TOGGLE.INCREASING) {
-        update_State_({ toggleState: TOGGLE.DECREASING, isReverse: true });
+        update_State_({ toggleState: TOGGLE.DECREASING, hasReversed: true });
         doDecrease();
       } else if (_this._state_.toggleState === TOGGLE.DECREASING) {
         update_State_({
           toggleState: TOGGLE.INCREASING,
-          isReverse: true
+          hasReversed: true
         });
         doIncrease();
       }
@@ -288,10 +288,7 @@ var FuzzyToggle = function (_React$Component) {
       var elapsedTime = Math.min(duration, _this.now() - startTime);
       var range = elapsedTime / duration;
 
-      _this.setState({
-        range: range,
-        isReverse: _this._state_.isReverse
-      });
+      _this.setState({ range: range });
 
       if (elapsedTime < duration) {
         _this.nextTick(_this.increaseEvent);
@@ -306,13 +303,13 @@ var FuzzyToggle = function (_React$Component) {
 
     _this._state_ = {
       toggleState: _this.props.isEmpty ? TOGGLE.EMPTY : TOGGLE.FULL,
-      isReverse: false,
+      hasReversed: false,
       duration: _this.sanitizeDuration(_this.props.duration)
     };
 
     _this.state = {
       toggleState: _this._state_.toggleState,
-      isReverse: _this._state_.isReverse,
+      hasReversed: _this._state_.hasReversed,
       range: _this.props.isEmpty ? 0 : 1
     };
     return _this;
@@ -326,7 +323,7 @@ var FuzzyToggle = function (_React$Component) {
         toggleState: this.state.toggleState,
         isFuzzy: this.isFuzzy(this.state.toggleState),
         range: this.state.range,
-        isReverse: this.state.isReverse
+        hasReversed: this.state.hasReversed
       });
     }
   }, {

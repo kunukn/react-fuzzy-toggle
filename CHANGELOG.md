@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.0.8
+* changed render prop to hasReversed
+
 ### 0.0.7
 * update readme
 
