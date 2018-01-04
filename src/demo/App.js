@@ -97,7 +97,7 @@ export default class App extends React.Component {
             this.setState({ duration: ~~(Math.random() * 800 + 200) });
           }}
         >
-          Randomize
+          Randomize duration
         </button>
         <div>{this.state.duration}</div>
         {components}

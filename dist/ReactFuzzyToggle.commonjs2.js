@@ -112,8 +112,6 @@ var _react2 = _interopRequireDefault(_react);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -123,7 +121,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  used for minimizing unnessary re-renderings and because setState is async.
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 
-//import PropTypes from 'prop-types';
+// eslint-disable-line import/no-extraneous-dependencies
+// import PropTypes from 'prop-types'; // eslint-disable-line import/no-extraneous-dependencies
 
 var rAF = window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : function (callback) {
   return window.setTimeout(callback, 16);
@@ -135,6 +134,29 @@ var TOGGLE = {
   FULL: 'FULL',
   DECREASING: 'DECREASING',
   INCREASING: 'INCREASING'
+};
+
+var util = {
+  isFuzzy: function isFuzzy(toggleState) {
+    return toggleState === TOGGLE.EXPANDING || toggleState === TOGGLE.COLLAPSING;
+  },
+  clamp: function clamp(_ref) {
+    var value = _ref.value,
+        _ref$max = _ref.max,
+        max = _ref$max === undefined ? 1 : _ref$max,
+        _ref$min = _ref.min,
+        min = _ref$min === undefined ? 0 : _ref$min;
+
+    if (value > max) return max;
+    if (value < min) return min;
+    return value;
+  },
+  now: function now() {
+    return new Date().getTime();
+  },
+  sanitizeDuration: function sanitizeDuration(duration) {
+    return Math.max(parseInt(duration, 10) || 1, 1);
+  }
 };
 
 var FuzzyToggle = function (_React$Component) {
@@ -156,28 +178,28 @@ var FuzzyToggle = function (_React$Component) {
     var _this = _possibleConstructorReturn(this, (FuzzyToggle.__proto__ || Object.getPrototypeOf(FuzzyToggle)).call(this, props));
 
     _this.onFull = function () {
-      _this.props.onFull && _this.props.onFull();
+      if (_this.props.onFull) _this.props.onFull();
     };
 
     _this.onEmpty = function () {
-      _this.props.onEmpty && _this.props.onEmpty();
+      if (_this.props.onEmpty) _this.props.onEmpty();
     };
 
     _this.onIncreasing = function () {
-      _this.props.onIncreasing && _this.props.onIncreasing();
+      if (_this.props.onIncreasing) _this.props.onIncreasing();
     };
 
     _this.onDecreasing = function () {
-      _this.props.onDecreasing && _this.props.onDecreasing();
+      if (_this.props.onDecreasing) _this.props.onDecreasing();
     };
 
     _this.onToggle = function () {
-      var update_State_ = function update_State_(_ref) {
-        var toggleState = _ref.toggleState,
-            _ref$hasReversed = _ref.hasReversed,
-            hasReversed = _ref$hasReversed === undefined ? false : _ref$hasReversed;
+      var updateInternalState = function updateInternalState(_ref2) {
+        var toggleState = _ref2.toggleState,
+            _ref2$hasReversed = _ref2.hasReversed,
+            hasReversed = _ref2$hasReversed === undefined ? false : _ref2$hasReversed;
 
-        var now = _this.now();
+        var now = util.now();
 
         _this._state_.toggleState = toggleState;
         _this._state_.hasReversed = hasReversed;
@@ -211,16 +233,19 @@ var FuzzyToggle = function (_React$Component) {
       };
 
       if (_this._state_.toggleState === TOGGLE.FULL) {
-        update_State_({ toggleState: TOGGLE.DECREASING });
+        updateInternalState({ toggleState: TOGGLE.DECREASING });
         doDecrease();
       } else if (_this._state_.toggleState === TOGGLE.EMPTY) {
-        update_State_({ toggleState: TOGGLE.INCREASING });
+        updateInternalState({ toggleState: TOGGLE.INCREASING });
         doIncrease();
       } else if (_this._state_.toggleState === TOGGLE.INCREASING) {
-        update_State_({ toggleState: TOGGLE.DECREASING, hasReversed: true });
+        updateInternalState({
+          toggleState: TOGGLE.DECREASING,
+          hasReversed: true
+        });
         doDecrease();
       } else if (_this._state_.toggleState === TOGGLE.DECREASING) {
-        update_State_({
+        updateInternalState({
           toggleState: TOGGLE.INCREASING,
           hasReversed: true
         });
@@ -246,8 +271,8 @@ var FuzzyToggle = function (_React$Component) {
           duration = _this$_state_2.duration,
           startTime = _this$_state_2.startTime;
 
-      var elapsedTime = Math.min(duration, _this.now() - startTime);
-      var range = 1 - elapsedTime / duration;
+      var elapsedTime = Math.min(duration, util.now() - startTime);
+      var range = util.clamp({ value: 1 - elapsedTime / duration });
 
       _this.setState({ range: range });
 
@@ -276,8 +301,8 @@ var FuzzyToggle = function (_React$Component) {
           duration = _this$_state_3.duration,
           startTime = _this$_state_3.startTime;
 
-      var elapsedTime = Math.min(duration, _this.now() - startTime);
-      var range = elapsedTime / duration;
+      var elapsedTime = Math.min(duration, util.now() - startTime);
+      var range = util.clamp({ value: elapsedTime / duration });
 
       _this.setState({ range: range });
 
@@ -295,7 +320,7 @@ var FuzzyToggle = function (_React$Component) {
     _this._state_ = {
       toggleState: _this.props.isEmpty ? TOGGLE.EMPTY : TOGGLE.FULL,
       hasReversed: false,
-      duration: _this.sanitizeDuration(_this.props.duration)
+      duration: util.sanitizeDuration(_this.props.duration)
     };
 
     _this.state = {
@@ -312,31 +337,16 @@ var FuzzyToggle = function (_React$Component) {
       return this.props.render({
         onToggle: this.onToggle,
         toggleState: this.state.toggleState,
-        isFuzzy: this.isFuzzy(this.state.toggleState),
+        isFuzzy: util.isFuzzy(this.state.toggleState),
         range: this.state.range,
         hasReversed: this.state.hasReversed
       });
     }
   }, {
-    key: 'now',
-    value: function now() {
-      return new Date().getTime();
-    }
-  }, {
-    key: 'sanitizeDuration',
-    value: function sanitizeDuration(duration) {
-      return Math.max(parseInt(duration, 10) || 1, 1);
-    }
-  }, {
-    key: 'isFuzzy',
-    value: function isFuzzy(state) {
-      return state === TOGGLE.INCREASING || state === TOGGLE.DECREASING;
-    }
-  }, {
     key: 'componentWillReceiveProps',
     value: function componentWillReceiveProps(nextProps) {
       if (nextProps.duration !== this.props.duration) {
-        this._state_.duration = this.sanitizeDuration(nextProps.duration);
+        this._state_.duration = util.sanitizeDuration(nextProps.duration);
       }
     }
   }, {
@@ -349,13 +359,13 @@ var FuzzyToggle = function (_React$Component) {
   return FuzzyToggle;
 }(_react2.default.Component);
 
-FuzzyToggle.defaultProps = _defineProperty({
+FuzzyToggle.defaultProps = {
   duration: 300,
   isEmpty: false,
   onFull: null,
   onEmpty: null,
   onDecreasing: null
-}, 'onDecreasing', null);
+};
 exports.default = FuzzyToggle;
 
 /***/ }),

@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.0.9
+* add eslint
+
 ### 0.0.8
 * changed render prop to hasReversed
 

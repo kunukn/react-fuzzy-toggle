@@ -3,8 +3,8 @@
   used for minimizing unnessary re-renderings and because setState is async.
 */
 
-import React from 'react';
-//import PropTypes from 'prop-types';
+import React from 'react'; // eslint-disable-line import/no-extraneous-dependencies
+// import PropTypes from 'prop-types'; // eslint-disable-line import/no-extraneous-dependencies
 
 const rAF = window.requestAnimationFrame
   ? window.requestAnimationFrame.bind(window)
@@ -20,13 +20,24 @@ const TOGGLE = {
   INCREASING: 'INCREASING',
 };
 
+const util = {
+  isFuzzy: toggleState =>
+    toggleState === TOGGLE.EXPANDING || toggleState === TOGGLE.COLLAPSING,
+  clamp: ({ value, max = 1, min = 0 }) => {
+    if (value > max) return max;
+    if (value < min) return min;
+    return value;
+  },
+  now: () => new Date().getTime(),
+  sanitizeDuration: duration => Math.max(parseInt(duration, 10) || 1, 1),
+};
+
 export default class FuzzyToggle extends React.Component {
   static defaultProps = {
     duration: 300,
     isEmpty: false,
     onFull: null,
     onEmpty: null,
-    onDecreasing: null,
     onDecreasing: null,
   };
 
@@ -46,7 +57,7 @@ export default class FuzzyToggle extends React.Component {
     this._state_ = {
       toggleState: this.props.isEmpty ? TOGGLE.EMPTY : TOGGLE.FULL,
       hasReversed: false,
-      duration: this.sanitizeDuration(this.props.duration),
+      duration: util.sanitizeDuration(this.props.duration),
     };
 
     this.state = {
@@ -60,32 +71,28 @@ export default class FuzzyToggle extends React.Component {
     return this.props.render({
       onToggle: this.onToggle,
       toggleState: this.state.toggleState,
-      isFuzzy: this.isFuzzy(this.state.toggleState),
+      isFuzzy: util.isFuzzy(this.state.toggleState),
       range: this.state.range,
       hasReversed: this.state.hasReversed,
     });
   }
 
-  now() {
-    return new Date().getTime();
-  }
-
   onFull = () => {
-    this.props.onFull && this.props.onFull();
+    if (this.props.onFull) this.props.onFull();
   };
   onEmpty = () => {
-    this.props.onEmpty && this.props.onEmpty();
+    if (this.props.onEmpty) this.props.onEmpty();
   };
   onIncreasing = () => {
-    this.props.onIncreasing && this.props.onIncreasing();
+    if (this.props.onIncreasing) this.props.onIncreasing();
   };
   onDecreasing = () => {
-    this.props.onDecreasing && this.props.onDecreasing();
+    if (this.props.onDecreasing) this.props.onDecreasing();
   };
 
   onToggle = () => {
-    const update_State_ = ({ toggleState, hasReversed = false }) => {
-      const now = this.now();
+    const updateInternalState = ({ toggleState, hasReversed = false }) => {
+      const now = util.now();
 
       this._state_.toggleState = toggleState;
       this._state_.hasReversed = hasReversed;
@@ -116,26 +123,25 @@ export default class FuzzyToggle extends React.Component {
     };
 
     if (this._state_.toggleState === TOGGLE.FULL) {
-      update_State_({ toggleState: TOGGLE.DECREASING });
+      updateInternalState({ toggleState: TOGGLE.DECREASING });
       doDecrease();
     } else if (this._state_.toggleState === TOGGLE.EMPTY) {
-      update_State_({ toggleState: TOGGLE.INCREASING });
+      updateInternalState({ toggleState: TOGGLE.INCREASING });
       doIncrease();
     } else if (this._state_.toggleState === TOGGLE.INCREASING) {
-      update_State_({ toggleState: TOGGLE.DECREASING, hasReversed: true });
+      updateInternalState({
+        toggleState: TOGGLE.DECREASING,
+        hasReversed: true,
+      });
       doDecrease();
     } else if (this._state_.toggleState === TOGGLE.DECREASING) {
-      update_State_({
+      updateInternalState({
         toggleState: TOGGLE.INCREASING,
         hasReversed: true,
       });
       doIncrease();
     }
   };
-
-  sanitizeDuration(duration) {
-    return Math.max(parseInt(duration, 10) || 1, 1);
-  }
 
   setToEmptyState = () => {
     this.setState({
@@ -152,8 +158,8 @@ export default class FuzzyToggle extends React.Component {
     }
 
     const { duration, startTime } = this._state_;
-    const elapsedTime = Math.min(duration, this.now() - startTime);
-    const range = 1 - elapsedTime / duration;
+    const elapsedTime = Math.min(duration, util.now() - startTime);
+    const range = util.clamp({ value: 1 - elapsedTime / duration });
 
     this.setState({ range });
 
@@ -179,8 +185,8 @@ export default class FuzzyToggle extends React.Component {
     }
 
     const { duration, startTime } = this._state_;
-    const elapsedTime = Math.min(duration, this.now() - startTime);
-    const range = elapsedTime / duration;
+    const elapsedTime = Math.min(duration, util.now() - startTime);
+    const range = util.clamp({ value: elapsedTime / duration });
 
     this.setState({ range });
 
@@ -195,13 +201,9 @@ export default class FuzzyToggle extends React.Component {
     this._state_.timeout = rAF(callback);
   };
 
-  isFuzzy(state) {
-    return state === TOGGLE.INCREASING || state === TOGGLE.DECREASING;
-  }
-
   componentWillReceiveProps(nextProps) {
     if (nextProps.duration !== this.props.duration) {
-      this._state_.duration = this.sanitizeDuration(nextProps.duration);
+      this._state_.duration = util.sanitizeDuration(nextProps.duration);
     }
   }
 
