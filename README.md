@@ -3,8 +3,16 @@
 Interruptible toggle with a state between 0 and 1. 
 You can reverse the toggle direction before it has finished the toggling.
 
+## npm
 
-## Demo
+https://www.npmjs.com/package/react-fuzzy-toggle
+
+## cdn
+
+https://unpkg.com/react-fuzzy-toggle/
+
+
+## demo
 
 * npm install
 * npm start
