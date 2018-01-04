@@ -22,7 +22,7 @@ import { FuzzyToggle } from 'react-fuzzy-toggle';
 
 <FuzzyToggle
   duration={500 /* duration in milli seconds */ }
-  isEmpty={/* default false */}
+  isEmpty={false /* default false */}
   onFull={() => {/* optional callback when full happens */}}
   onEmpty={() => {/* optional callback */}}
   onIncreasing={() => {/* optional callback */}}
