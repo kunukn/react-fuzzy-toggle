@@ -78,20 +78,13 @@ module.exports = __webpack_require__(1);
 "use strict";
 
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+var FuzzyToggle = __webpack_require__(2).default;
 
-var _FuzzyToggle = __webpack_require__(2);
+module.exports = {
+  FuzzyToggle: FuzzyToggle
+};
 
-Object.defineProperty(exports, 'FuzzyToggle', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_FuzzyToggle).default;
-  }
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+// export { default as FuzzyToggle } from './FuzzyToggle';
 
 /***/ }),
 /* 2 */
@@ -117,8 +110,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 _state_ is internal state.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 used for minimizing unnessary re-renderings and because setState is async.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 _state_ is internal state for sync and rendering control.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 setState is async and I need sync control because timing is important 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 and because I need to control what is to be re-rendered.
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
 
 // eslint-disable-line import/no-extraneous-dependencies
@@ -155,7 +149,7 @@ var util = {
     return new Date().getTime();
   },
   sanitizeDuration: function sanitizeDuration(duration) {
-    return Math.max(parseInt(duration, 10) || 1, 1);
+    return Math.max(0, parseInt(+duration, 10) || 0);
   }
 };
 
@@ -205,10 +199,9 @@ var FuzzyToggle = function (_React$Component) {
         _this._state_.hasReversed = hasReversed;
 
         if (hasReversed) {
-          var _this$_state_ = _this._state_,
-              duration = _this$_state_.duration,
-              startTime = _this$_state_.startTime;
+          var startTime = _this._state_.startTime;
 
+          var duration = util.sanitizeDuration(_this.props.duration);
           var elapsedTime = Math.min(duration, now - startTime);
           var subtract = Math.max(0, duration - elapsedTime);
           _this._state_.startTime = now - subtract;
@@ -267,9 +260,14 @@ var FuzzyToggle = function (_React$Component) {
         return;
       }
 
-      var _this$_state_2 = _this._state_,
-          duration = _this$_state_2.duration,
-          startTime = _this$_state_2.startTime;
+      var duration = util.sanitizeDuration(_this.props.duration);
+      if (duration <= 0) {
+        _this.setToEmptyState();
+        return;
+      }
+
+      var startTime = _this._state_.startTime;
+
 
       var elapsedTime = Math.min(duration, util.now() - startTime);
       var range = util.clamp({ value: 1 - elapsedTime / duration });
@@ -297,9 +295,13 @@ var FuzzyToggle = function (_React$Component) {
         return;
       }
 
-      var _this$_state_3 = _this._state_,
-          duration = _this$_state_3.duration,
-          startTime = _this$_state_3.startTime;
+      var duration = util.sanitizeDuration(_this.props.duration);
+      if (duration <= 0) {
+        _this.setToFullState();
+        return;
+      }
+
+      var startTime = _this._state_.startTime;
 
       var elapsedTime = Math.min(duration, util.now() - startTime);
       var range = util.clamp({ value: elapsedTime / duration });
@@ -319,8 +321,7 @@ var FuzzyToggle = function (_React$Component) {
 
     _this._state_ = {
       toggleState: _this.props.isEmpty ? TOGGLE.EMPTY : TOGGLE.FULL,
-      hasReversed: false,
-      duration: util.sanitizeDuration(_this.props.duration)
+      hasReversed: false
     };
 
     _this.state = {
@@ -341,13 +342,6 @@ var FuzzyToggle = function (_React$Component) {
         range: this.state.range,
         hasReversed: this.state.hasReversed
       });
-    }
-  }, {
-    key: 'componentWillReceiveProps',
-    value: function componentWillReceiveProps(nextProps) {
-      if (nextProps.duration !== this.props.duration) {
-        this._state_.duration = util.sanitizeDuration(nextProps.duration);
-      }
     }
   }, {
     key: 'componentWillUnmount',
@@ -372,7 +366,7 @@ exports.default = FuzzyToggle;
 /* 3 */
 /***/ (function(module, exports) {
 
-module.exports = require("React");
+module.exports = require("react");
 
 /***/ })
 /******/ ]);

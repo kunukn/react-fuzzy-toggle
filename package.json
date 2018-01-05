@@ -1,6 +1,6 @@
 {
   "name": "react-fuzzy-toggle",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "fuzzy toggle",
   "main": "dist/ReactFuzzyToggle.commonjs2.js",
   "umd": "dist/ReactFuzzyToggle.umd.js",

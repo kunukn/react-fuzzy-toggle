@@ -1,6 +1,7 @@
 /*
-  _state_ is internal state.
-  used for minimizing unnessary re-renderings and because setState is async.
+  _state_ is internal state for sync and rendering control.
+  setState is async and I need sync control because timing is important 
+  and because I need to control what is to be re-rendered.
 */
 
 import React from 'react'; // eslint-disable-line import/no-extraneous-dependencies
@@ -29,7 +30,7 @@ const util = {
     return value;
   },
   now: () => new Date().getTime(),
-  sanitizeDuration: duration => Math.max(parseInt(duration, 10) || 1, 1),
+  sanitizeDuration: duration => Math.max(0, parseInt(+duration, 10) || 0),
 };
 
 export default class FuzzyToggle extends React.Component {
@@ -57,7 +58,6 @@ export default class FuzzyToggle extends React.Component {
     this._state_ = {
       toggleState: this.props.isEmpty ? TOGGLE.EMPTY : TOGGLE.FULL,
       hasReversed: false,
-      duration: util.sanitizeDuration(this.props.duration),
     };
 
     this.state = {
@@ -98,7 +98,8 @@ export default class FuzzyToggle extends React.Component {
       this._state_.hasReversed = hasReversed;
 
       if (hasReversed) {
-        const { duration, startTime } = this._state_;
+        const { startTime } = this._state_;
+        const duration = util.sanitizeDuration(this.props.duration);
         const elapsedTime = Math.min(duration, now - startTime);
         const subtract = Math.max(0, duration - elapsedTime);
         this._state_.startTime = now - subtract;
@@ -157,7 +158,14 @@ export default class FuzzyToggle extends React.Component {
       return;
     }
 
-    const { duration, startTime } = this._state_;
+    const duration = util.sanitizeDuration(this.props.duration);
+    if (duration <= 0) {
+      this.setToEmptyState();
+      return;
+    }
+
+    const { startTime } = this._state_;
+
     const elapsedTime = Math.min(duration, util.now() - startTime);
     const range = util.clamp({ value: 1 - elapsedTime / duration });
 
@@ -184,7 +192,13 @@ export default class FuzzyToggle extends React.Component {
       return;
     }
 
-    const { duration, startTime } = this._state_;
+    const duration = util.sanitizeDuration(this.props.duration);
+    if (duration <= 0) {
+      this.setToFullState();
+      return;
+    }
+
+    const { startTime } = this._state_;
     const elapsedTime = Math.min(duration, util.now() - startTime);
     const range = util.clamp({ value: elapsedTime / duration });
 
@@ -200,12 +214,6 @@ export default class FuzzyToggle extends React.Component {
   nextTick = callback => {
     this._state_.timeout = rAF(callback);
   };
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.duration !== this.props.duration) {
-      this._state_.duration = util.sanitizeDuration(nextProps.duration);
-    }
-  }
 
   componentWillUnmount() {
     cAF(this._state_.timeout);

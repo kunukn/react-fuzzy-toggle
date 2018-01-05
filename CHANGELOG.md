@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.0.11
+* remove componentWillReceiveProps
+
 ### 0.0.10
 * update readme
 

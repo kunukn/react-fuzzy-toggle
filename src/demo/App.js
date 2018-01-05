@@ -1,6 +1,6 @@
 import React from 'react';
 import eases from 'eases';
-import { FuzzyToggle } from '../library/ReactFuzzyToggle';
+import { FuzzyToggle } from 'library/ReactFuzzyToggle';
 
 const log = console.log.bind(console);
 const round = val => val.toFixed(1);

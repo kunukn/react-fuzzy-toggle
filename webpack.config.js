@@ -90,7 +90,11 @@ module.exports = (env = {}) => {
     },
     plugins: plugins,
     resolve: {
-      extensions: ['.js','.jsx']
+      extensions: ['.js','.jsx'],
+      alias: {
+        'library': path.resolve(__dirname, 'src/library'),
+        'react-fuzzy-toggle': path.resolve(__dirname, 'src/library/index.js'),
+      }
     },
     externals: {}
   };

@@ -78,9 +78,14 @@ function createConfig(options) {
       extensions: ['.js', '.jsx'],
     },
     externals: {
-      "react": "React",
-      "react-dom": "ReactDOM",
-      "prop-types": "PropTypes",
+      react: {
+        root: 'React',
+        commonjs2: 'react',
+        commonjs: 'react',
+        amd: 'react',
+      },
+      //'react-dom': 'ReactDOM',
+      //'prop-types': 'PropTypes',
     }
   };
 }
