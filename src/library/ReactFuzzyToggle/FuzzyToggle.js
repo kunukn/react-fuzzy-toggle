@@ -23,7 +23,7 @@ const TOGGLE = {
 
 const util = {
   isFuzzy: toggleState =>
-    toggleState === TOGGLE.EXPANDING || toggleState === TOGGLE.COLLAPSING,
+    toggleState === TOGGLE.INCREASING || toggleState === TOGGLE.DECREASING,
   clamp: ({ value, max = 1, min = 0 }) => {
     if (value > max) return max;
     if (value < min) return min;
@@ -64,6 +64,7 @@ export default class FuzzyToggle extends React.Component {
       toggleState: this._state_.toggleState,
       hasReversed: this._state_.hasReversed,
       range: this.props.isEmpty ? 0 : 1,
+      isFuzzy: false,
     };
   }
 
@@ -108,8 +109,9 @@ export default class FuzzyToggle extends React.Component {
       }
 
       this.setState({
-        toggleState,
-        hasReversed,
+        toggleState: this._state_.toggleState,
+        hasReversed: this._state_.hasReversed,
+        isFuzzy: util.isFuzzy(this._state_.toggleState),
       });
     };
 
@@ -148,6 +150,7 @@ export default class FuzzyToggle extends React.Component {
     this.setState({
       range: 0,
       toggleState: TOGGLE.EMPTY,
+      isFuzzy: false,
     });
     this._state_.toggleState = TOGGLE.EMPTY;
     this.onEmpty();
@@ -182,6 +185,7 @@ export default class FuzzyToggle extends React.Component {
     this.setState({
       range: 1,
       toggleState: TOGGLE.FULL,
+      isFuzzy: false,
     });
     this._state_.toggleState = TOGGLE.FULL;
     this.onFull();

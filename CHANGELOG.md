@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.0.12
+* fix isFuzzy
+
 ### 0.0.11
 * remove componentWillReceiveProps
 

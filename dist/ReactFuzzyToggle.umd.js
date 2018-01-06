@@ -141,7 +141,7 @@ var TOGGLE = {
 
 var util = {
   isFuzzy: function isFuzzy(toggleState) {
-    return toggleState === TOGGLE.EXPANDING || toggleState === TOGGLE.COLLAPSING;
+    return toggleState === TOGGLE.INCREASING || toggleState === TOGGLE.DECREASING;
   },
   clamp: function clamp(_ref) {
     var value = _ref.value,
@@ -219,8 +219,9 @@ var FuzzyToggle = function (_React$Component) {
         }
 
         _this.setState({
-          toggleState: toggleState,
-          hasReversed: hasReversed
+          toggleState: _this._state_.toggleState,
+          hasReversed: _this._state_.hasReversed,
+          isFuzzy: util.isFuzzy(_this._state_.toggleState)
         });
       };
 
@@ -258,7 +259,8 @@ var FuzzyToggle = function (_React$Component) {
     _this.setToEmptyState = function () {
       _this.setState({
         range: 0,
-        toggleState: TOGGLE.EMPTY
+        toggleState: TOGGLE.EMPTY,
+        isFuzzy: false
       });
       _this._state_.toggleState = TOGGLE.EMPTY;
       _this.onEmpty();
@@ -293,7 +295,8 @@ var FuzzyToggle = function (_React$Component) {
     _this.setToFullState = function () {
       _this.setState({
         range: 1,
-        toggleState: TOGGLE.FULL
+        toggleState: TOGGLE.FULL,
+        isFuzzy: false
       });
       _this._state_.toggleState = TOGGLE.FULL;
       _this.onFull();
@@ -336,7 +339,8 @@ var FuzzyToggle = function (_React$Component) {
     _this.state = {
       toggleState: _this._state_.toggleState,
       hasReversed: _this._state_.hasReversed,
-      range: _this.props.isEmpty ? 0 : 1
+      range: _this.props.isEmpty ? 0 : 1,
+      isFuzzy: false
     };
     return _this;
   }
