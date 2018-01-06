@@ -6,11 +6,12 @@ body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
+  position: relative;
 }
 
 .app {
-  padding: 1rem;
-  padding-bottom: 20rem;
+  padding: 3rem 1rem 20rem;
+  //padding-bottom: 20rem;
 
   button {
     font-size: 1rem;
@@ -54,7 +55,42 @@ body {
     left: 0;
     height: 100%;
     width: 100%;
-    background: rgba(100, 200, 0,.5);
+    background: rgba(100, 200, 0, 0.5);
     transform-origin: 0 0;
+  }
+}
+
+.menu-toggle {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2rem;
+  width: 100%;
+  z-index: 1;
+  //overflow: hidden;
+  &__header {
+    width: 100%;
+    background: #eee;
+  }
+  &__button {
+    width: 100%;
+    span {
+      display: inline-block;
+      min-width: 2rem;
+    }
+  }
+  &__box {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 300px;
+    height: 100%;
+    background: rgba(#ddd, .8);
+    z-index: -1;
+    will-change: transform;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    font-size: 3rem;
   }
 }

@@ -15,29 +15,31 @@ export default class App extends React.Component {
     toggleState,
     isFuzzy,
     hasReversed,
-  }) => (
-    <div className="fuzzy-toggle">
-      <div className="fuzzy-toggle__header">
-        <button className="fuzzy-toggle__button" onClick={onToggle}>
-          toggle
-        </button>
-      </div>
-      <div className="fuzzy-toggle__box">
-        <div>{round(range)}</div>
-        <div>toggleState: {toggleState}</div>
-        <div>hasReversed: {hasReversed + ''}</div>
-        <div>{easeName}</div>
-        <div className="visual">
-          <div
-            className="visual__indicator"
-            style={{
-              transform: `scale3d(${ease(range)}, 1, 1)`,
-            }}
-          />
+  }) => {
+    return (
+      <div className="fuzzy-toggle">
+        <div className="fuzzy-toggle__header">
+          <button className="fuzzy-toggle__button" onClick={onToggle}>
+            toggle
+          </button>
+        </div>
+        <div className="fuzzy-toggle__box">
+          <div>{round(range)}</div>
+          <div>toggleState: {toggleState}</div>
+          <div>hasReversed: {hasReversed + ''}</div>
+          <div>{easeName}</div>
+          <div className="visual">
+            <div
+              className="visual__indicator"
+              style={{
+                transform: `scale3d(${ease(range)}, 1, 1)`,
+              }}
+            />
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   render() {
     const components = [];
@@ -91,6 +93,36 @@ export default class App extends React.Component {
 
     return (
       <div className="app">
+        <FuzzyToggle
+          isEmpty
+          duration={this.state.duration}
+          render={({ onToggle, range, toggleState, isFuzzy }) => {
+            const value =
+              toggleState === 'INCREASING'
+                ? eases['circIn'](1 - range)
+                : eases['bounceOut'](1 - range);
+
+            return (
+              <div className="menu-toggle">
+                <div className="menu-toggle__header">
+                  <button className="menu-toggle__button" onClick={onToggle}>
+                    menu toggle (<span>{range.toFixed(1)}</span>)
+                  </button>
+                </div>
+                <div
+                  className="menu-toggle__box"
+                  style={{
+                    transform: `translate3d(calc(${-100 * value}% + ${value *
+                      0.5}rem),0,0)`,
+                  }}
+                >
+                  menu
+                </div>
+              </div>
+            );
+          }}
+        />
+
         <button
           className="app__button"
           onClick={() => {
