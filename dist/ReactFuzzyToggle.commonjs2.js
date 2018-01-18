@@ -91,7 +91,7 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
+/* WEBPACK VAR INJECTION */(function(global) {
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -99,7 +99,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(3);
+var _react = __webpack_require__(4);
 
 var _react2 = _interopRequireDefault(_react);
 
@@ -118,10 +118,12 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 // eslint-disable-line import/no-extraneous-dependencies
 // import PropTypes from 'prop-types'; // eslint-disable-line import/no-extraneous-dependencies
 
-var rAF = window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : function (callback) {
-  return window.setTimeout(callback, 16);
+// Support browser or node env
+var root = typeof window !== 'undefined' ? window : global;
+var rAF = root.requestAnimationFrame ? root.requestAnimationFrame.bind(root) : function (callback) {
+  return root.setTimeout(callback, 16);
 };
-var cAF = window.cancelAnimationFrame ? window.cancelAnimationFrame.bind(window) : window.clearInterval.bind(window);
+var cAF = root.cancelAnimationFrame ? root.cancelAnimationFrame.bind(root) : root.clearInterval.bind(root);
 
 var TOGGLE = {
   EMPTY: 'EMPTY',
@@ -172,19 +174,29 @@ var FuzzyToggle = function (_React$Component) {
     var _this = _possibleConstructorReturn(this, (FuzzyToggle.__proto__ || Object.getPrototypeOf(FuzzyToggle)).call(this, props));
 
     _this.onFull = function () {
-      if (_this.props.onFull) _this.props.onFull();
+      if (_this.props.onFull) _this.props.onFull({
+        hasReversed: _this.state.hasReversed
+      });
     };
 
     _this.onEmpty = function () {
-      if (_this.props.onEmpty) _this.props.onEmpty();
+      if (_this.props.onEmpty) _this.props.onEmpty({
+        hasReversed: _this.state.hasReversed
+      });
     };
 
     _this.onIncreasing = function () {
-      if (_this.props.onIncreasing) _this.props.onIncreasing();
+      if (_this.props.onIncreasing) _this.props.onIncreasing({
+        range: _this.state.range,
+        hasReversed: _this.state.hasReversed
+      });
     };
 
     _this.onDecreasing = function () {
-      if (_this.props.onDecreasing) _this.props.onDecreasing();
+      if (_this.props.onDecreasing) _this.props.onDecreasing({
+        range: _this.state.range,
+        hasReversed: _this.state.hasReversed
+      });
     };
 
     _this.onToggle = function () {
@@ -365,9 +377,37 @@ FuzzyToggle.defaultProps = {
   onDecreasing: null
 };
 exports.default = FuzzyToggle;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ }),
 /* 3 */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1,eval)("this");
+} catch(e) {
+	// This works if the window reference is available
+	if(typeof window === "object")
+		g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
+/* 4 */
 /***/ (function(module, exports) {
 
 module.exports = require("react");

@@ -16,6 +16,9 @@ export default class App extends React.Component {
     isFuzzy,
     hasReversed,
   }) => {
+
+    /* optional logic here */
+
     return (
       <div className="fuzzy-toggle">
         <div className="fuzzy-toggle__header">

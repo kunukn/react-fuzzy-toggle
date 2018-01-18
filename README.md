@@ -23,10 +23,10 @@ import { FuzzyToggle } from 'react-fuzzy-toggle';
 <FuzzyToggle
   duration={500 /* duration in milli seconds */ }
   isEmpty={false /* default false */}
-  onFull={() => {/* optional callback when full happens */}}
-  onEmpty={() => {/* optional callback */}}
-  onIncreasing={() => {/* optional callback */}}
-  onDecreasing={() => {/* optional callback */}}
+  onFull={({hasReversed}) => {/* optional callback when full happens */}}
+  onEmpty={({hasReversed}) => {/* optional callback */}}
+  onIncreasing={({range, hasReversed}) => {/* optional callback */}}
+  onDecreasing={({range, hasReversed}) => {/* optional callback */}}
   render={({ 
     onToggle, 
     range, 

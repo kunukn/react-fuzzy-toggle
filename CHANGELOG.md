@@ -1,5 +1,9 @@
 ## Changelog
 
+### 0.0.13
+* test whether window is defined
+* add properties to optional event hooks
+
 ### 0.0.12
 * fix isFuzzy
 

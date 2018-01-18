@@ -7,12 +7,14 @@
 import React from 'react'; // eslint-disable-line import/no-extraneous-dependencies
 // import PropTypes from 'prop-types'; // eslint-disable-line import/no-extraneous-dependencies
 
-const rAF = window.requestAnimationFrame
-  ? window.requestAnimationFrame.bind(window)
-  : callback => window.setTimeout(callback, 16);
-const cAF = window.cancelAnimationFrame
-  ? window.cancelAnimationFrame.bind(window)
-  : window.clearInterval.bind(window);
+// Support browser or node env
+const root = typeof window !== 'undefined' ? window : global;
+const rAF = root.requestAnimationFrame
+  ? root.requestAnimationFrame.bind(root)
+  : callback => root.setTimeout(callback, 16);
+const cAF = root.cancelAnimationFrame
+  ? root.cancelAnimationFrame.bind(root)
+  : root.clearInterval.bind(root);
 
 const TOGGLE = {
   EMPTY: 'EMPTY',
@@ -79,16 +81,30 @@ export default class FuzzyToggle extends React.Component {
   }
 
   onFull = () => {
-    if (this.props.onFull) this.props.onFull();
+    if (this.props.onFull)
+      this.props.onFull({
+        hasReversed: this.state.hasReversed,
+      });
   };
   onEmpty = () => {
-    if (this.props.onEmpty) this.props.onEmpty();
+    if (this.props.onEmpty)
+      this.props.onEmpty({
+        hasReversed: this.state.hasReversed,
+      });
   };
   onIncreasing = () => {
-    if (this.props.onIncreasing) this.props.onIncreasing();
+    if (this.props.onIncreasing)
+      this.props.onIncreasing({
+        range: this.state.range,
+        hasReversed: this.state.hasReversed,
+      });
   };
   onDecreasing = () => {
-    if (this.props.onDecreasing) this.props.onDecreasing();
+    if (this.props.onDecreasing)
+      this.props.onDecreasing({
+        range: this.state.range,
+        hasReversed: this.state.hasReversed,
+      });
   };
 
   onToggle = () => {
